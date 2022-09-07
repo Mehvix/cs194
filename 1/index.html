@@ -7,26 +7,432 @@
     <meta name="viewport" content="width=569,
     maximum-scale=1" />
     <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+
     <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
     <script src="//mehvix.com/static/js/include.js"></script>
+
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
 
     <title>Mehvix | CS194</title>
     <style>
         :root {
-            --outside-bg-color: #171717;
+            --outside-bg-color: #3d3d3d;
         }
 
+        body {
+            max-width: 75em !important;
+        }
+
+        #showcase {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: flex-start;
+        }
+
+        #showcase>blockquote {
+            width: 95%;
+        }
+
+        #showcase>blockquote>span {
+            display: flex;
+            justify-content: space-between;
+            align-items: center
+        }
+
+        #showcase>blockquote b {
+            font-size: 120%;
+        }
+
+        #showcase>blockquote img {
+            padding: 0.5em;
+        }
+
+        .fig {
+            font-size: 90%;
+            font-style: italic;
+            color: rgb(68, 68, 68);
+            text-align: center;
+            margin: .4em;
+        }
+
+        .right {
+            width: 35%;
+            padding: .8em;
+            float: right;
+        }
+
+        #edge,
+        #contr,
+        #border {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        #border>span {
+            width: 45%;
+        }
+
+        #contr>span {
+            width: 30%
+        }
+
+        #edge {
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        #edge>span {
+            width: 48%
+        }
     </style>
 </head>
 
 <body>
     <div class="box">
         <div class="nav">
-            <a href="//www.mehvix.com/">~</a>/<a href="../">CS194</a>/<a href="" class="inverse-bg">1</a>
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">1</a>
         </div>
 
         <article>
-            Lorem ipsum dolor sit amet, qui minim labore adipisicing minim sint cillum sint consectetur cupidatat.
+            <div>
+                <div>
+                    <span class="fig right"><img src="./figs/emir.jpg">Raw Image of the Last Emir of the Uzbek Manghit
+                        dynasty</span>
+                    <h1>Overview</h1>
+                    <p>
+                        In 1907, <a href="https://en.wikipedia.org/wiki/Sergey_Prokudin-Gorsky">Sergey Prokudin-Gorsky</a>
+                        won
+                        the Tzar's special permission to travel across the
+                        Russian Empire to photograph what would become some of the very first color photos-- you can see the
+                        whole collection <a href="https://www.loc.gov/pictures/collection/prok/">here</a>. He did this by
+                        taking three
+                        exposures (with a red, green and blue filter respectively) for every scene. Together,
+                        these three exposures could be combined to reveal the true colors of the photograph. Below, I go over
+                        my program's implementation of this process.
+                    </p>
+                </div>
+                <div>
+                    <h1>Border Cropping</h1>
+                    <p>
+                        After each image is divided equally into it's three layer components, we first go about automatically
+                        cropping the boarders. First, a temporary 0.5 <a
+                            href="https://en.wikipedia.org/wiki/Gamma_correction">gamma correction</a> is applied to each
+                        layer to bring out the differences of the boarder and then the horizontal and vertical <a
+                            href="https://en.wikipedia.org/wiki/Gradient">gradients</a> are calculated. Then, the
+                        greatest outermost rows and columns are trimmed if there is significant difference.</p>
+                    <p>
+                        In some of the images, such as the Emir to the right and Church below, there are two borders: one due
+                        to the white
+                        'ground' behind the plates and another of the actual black inner border. The first pass looks at the
+                        first 5% of the rows and columns from the edge, and the subsequent pass on the outermost 4.5% to
+                        ensure both of these are clipped.
+                    </p>
+                    <div id="border">
+                        <span class="fig">
+                            <img src="./figs/b.png" alt="">
+                            Original Blue Layer
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/b_g.png" alt="">
+                            0.5 Gamma Correction
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/b_1.png" alt="">
+                            Pass 1
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/b_2.png" alt="">
+                            Pass 2
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <h1>Contrast Normalization</h1>
+
+                    Next, each layer's contrast profile was normalized. This creates a uniform distribution, meaning that the
+                    full contrast range is present. Without this, many of the images appear more dull and the subsequent
+                    alignment algorithm performs worse.
+                    <div id="contr">
+                        <span class="fig">
+                            <img src="./figs/img-reg.png" alt="">
+                            <img src="./figs/contrast-reg.png" alt="">
+                            Original Red Layer
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/img-crop.png" alt="">
+                            <img src="./figs/contrast-crop.png" alt="">
+                            Trimmed
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/img-norm.png" alt="">
+                            <img src="./figs/contrast-norm.png" alt="">
+                            Normalized Contrast
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <h1>Alignment</h1>
+                    <p>
+                        <h2>Reference Channel</h2>
+                        Each layer deviates slightly from one another so we cannot lazily stack the images. To go about
+                        solving this, first a reference channel is chosen that will serve to align the
+                        other two. For each image, the reference channel is chosen to be the one that was most different from
+                        the remaining two.
+                    </p>
+                    <h2>Metric</h2>
+                    <p>
+                        Then, the alignment algorithm can be run on the other two layers. This algorithm shifts the
+                        input image around by some offset vector $\vec v$ and eventually returns the best offset that
+                        minimizes the difference between the two images. The metric used calculate the difference between two
+                        images is the <a href="https://en.wikipedia.org/wiki/Cross-correlation">Normalized Cross
+                            Correlation</a> (NCC) of the input and reference image's vector representation (unrolled
+                        matrices).
+                    </p>
+
+                    <div id="edge">
+                        <span>
+                            Originally, these vector representations were simply composed of the layer's brightness values.
+                            This
+                            worked well in most cases, but when a composition had a layer that was dominated by a single
+                            color
+                            (such as the blue sky, or the Emir's blue robe) the brightness values would not give good
+                            results.
+                            The way around this is to apply an <a href="https://en.wikipedia.org/wiki/Edge_detection">edge
+                                filter</a> before processing. I had messed around with a few and experimentally found <a
+                                href="https://en.wikipedia.org/wiki/Sobel_operator">Sobel's operator</a> worked best:
+                            <br>
+                            <br>
+                            <span>
+                                $$\mathbf{G}_x = \begin{bmatrix}
+                                +1 & 0 & -1 \\
+                                +2 & 0 & -2 \\
+                                +1 & 0 & -1
+                                \end{bmatrix} * \mathbf{A}
+                                \quad
+                                \mbox{and}
+                                \quad
+                                \mathbf{G}_y = \begin{bmatrix}
+                                +1 & +2 & +1\\
+                                0 & 0 & 0 \\
+                                -1 & -2 & -1
+                                \end{bmatrix} * \mathbf{A}$$
+                                $$\mathbf{G} = \sqrt{ {\mathbf{G}_x}^2 + {\mathbf{G}_y}^2 }$$
+                            </span>
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/r-edge.png" alt="">
+                            Red Edge
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/g-edge.png" alt="">
+                            Green Edge
+                        </span>
+                        <span class="fig">
+                            <img src="./figs/b-edge.png" alt="">
+                            Blue Edge
+                    </div>
+                    <h2>Optimization</h2>
+                    <p>
+                        NCC involves comparing every vector entry (pixel) of the two images to one another. For large images,
+                        this becomes very slow and is made worse by the fact that we have to calculate the NCC for every
+                        possible offset vector $\vec v$ we test.
+                    </p>
+                    <p>
+                        The solution to this is to use an <a
+                            href="https://en.wikipedia.org/wiki/Pyramid_(image_processing)">image pyramid</a>. This takes
+                        advantage of the fact that our comparison metric holds up reasonably well at lower resolutions of the
+                        images. As such, the algorithm downscales the input and reference image by a factor of 2 until both
+                        are smaller than
+                        a constant $64 \times 64$ number of pixels. At this base-case, the best (again, by measure of NCC)
+                        offset vector $\vec v \in [-7, 7] \times [-7, 7]$ is found and returned to the prior level of
+                        recursion. At each level, the offset vector is scaled up by a factor of 2; however, we now only have
+                        to test the offsets in the space $[-1, 1]\times [-1,1]$ around the doubled vector! This process
+                        repeats until at the original scale.
+                    </p>
+                    <p>
+                        Notice how we only consider a large space when operating with the smallest image scale, and at every
+                        other level only search a $3 \times 3$ square. In effect, we have $\log_2 (\text{max}(m, n))$ levels
+                        of recursion, each of which involve 9 calls to NCC which is proportional to the input dimensions.
+                        Since the input dimensions are halved each time, we do $\mathcal O \left(mn \left(1 + \frac 1 2 +
+                        \frac 1 4 + \frac 1 8 + \dots \right)\right) = \mathcal O (mn)$ work total. Disappointingly, this is
+                        the same complexity as a naive algorithm that searches a large space without downscaling; however in
+                        practice the pyramid algorithm takes
+                        <span style="white-space:nowrap;">~4-7</span> seconds to complete compared to the ~400 seconds to
+                        search
+                        over $[-25,25] \times [-25, 25]$ (which isn't even the full range of possible offsets!). This is
+                        because the full-size <code>.tif</code> images have $m, n \approx 3,000$ pixels after the initial
+                        border-cropping.
+                    </p>
+                </div>
+            </div>
+            <div>
+                <h1>Outcomes</h1>
+                <p>
+                    After the offsets are found, then the layers are combined to form a single image that look like those
+                    displayed below. I had also experimented with a few different noise-reducing algorithms such as <a
+                        href="https://en.wikipedia.org/wiki/Total_variation_denoising">total variation</a>. However, I
+                    was not able to find a good one that didn't remove the artifacts without also taking away many of the
+                    fine details -- I believe it wouldn't remain faithful to the original photographs. After all, we have
+                    enough perfect images nowadays.
+                </p>
+                <div id="showcase">
+                    <blockquote>
+                        <span>
+                            <b>Cathedral:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-5, -2],\ \vec v_\text{red} = [7, 1]$</span>
+                        </span>
+                        <img src='./imgs/cathedral.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Church:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-25, -4],\ \vec v_\text{red} = [33, -8]$</span>
+                        </span>
+                        <img src='./imgs/church.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Emir:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-49, -24],\ \vec v_\text{red} = [58, 17]$</span>
+                        </span>
+                        <img src='./imgs/emir.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Harvesters:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-59, -17],\ \vec v_\text{red} = [64, -3]$</span>
+                        </span>
+                        <img src='./imgs/harvesters.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Icon:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-39, -17],\ \vec v_\text{red} = [48, 5]$</span>
+                        </span>
+                        <img src='./imgs/icon.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Lady:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-55, -9],\ \vec v_\text{red} = [63, 4]$</span>
+                        </span>
+                        <img src='./imgs/lady.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Melons:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-83, -11],\ \vec v_\text{red} = [96, 3]$</span>
+                        </span>
+                        <img src='./imgs/melons.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Monastery:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [3, -2],\ \vec v_\text{red} = [6, 1]$</span>
+                        </span>
+                        <img src='./imgs/monastery.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Onion Church:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-52, -26],\ \vec v_\text{red} = [58, 10]$</span>
+                        </span>
+                        <img src='./imgs/onion_church.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Sculpture:</b>
+                            <span>Reference: Blue, $\vec v_\text{red} = [140, -27],\ \vec v_\text{green} = [33, -11]$</span>
+                        </span>
+                        <img src='./imgs/sculpture.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Self Portrait:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-79, -30],\ \vec v_\text{red} = [98, 8]$</span>
+                        </span>
+                        <img src='./imgs/self_portrait.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Three Generations:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-51, -13],\ \vec v_\text{red} = [58, -1]$</span>
+                        </span>
+                        <img src='./imgs/three_generations.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Tobolsk:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-3, -3],\ \vec v_\text{red} = [4, 1]$</span>
+                        </span>
+                        <img src='./imgs/tobolsk.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Train:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-42, -7],\ \vec v_\text{red} = [43, 26]$</span>
+                        </span>
+                        <img src='./imgs/train.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Custom 1:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-64, 6],\ \vec v_\text{red} = [76, -12]$</span>
+                        </span>
+                        <img src='./imgs/custom1.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Custom 2:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-15, -27],\ \vec v_\text{red} = [71, 25]$</span>
+                        </span>
+                        <img src='./imgs/custom2.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Custom 3:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-14, 1],\ \vec v_\text{red} = [69, -1]$</span>
+                        </span>
+                        <img src='./imgs/custom3.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Custom 4:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-33, -7],\ \vec v_\text{red} = [81, 6]$</span>
+                        </span>
+                        <img src='./imgs/custom4.jpg'></img>
+                    </blockquote>
+                    <blockquote>
+                        <span>
+                            <b>Custom 5:</b>
+                            <span>Reference: Green, $\vec v_\text{blue} = [-51, -13],\ \vec v_\text{red} = [64, 7]$</span>
+                        </span>
+                        <img src='./imgs/custom5.jpg'></img>
+                    </blockquote>
+                </div>
+            </div>
         </article>
 
         <div id="footer">

@@ -23,19 +23,38 @@
             box-shadow: none;
         }
 
+        article>div {
+            display: flex;
+            justify-content: space-around
+        }
+
+        article>div span {
+            width: 45%;
+        }
+
+        img {
+            width: 25em;
+        }
     </style>
 </head>
 
 <body>
     <div class="box">
         <div class="nav">
-            <a href="//www.mehvix.com/">~</a>/<a href="" class="inverse-bg">CS194</a>
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">2</a>
         </div>
 
         <article>
+
+            <!-- todo make this a grid -->
+            <!-- todo click-able images -->
             <ol>
-                <li><a href="1/">Colorizing the Prokudin-Gorskii Photo Collection</a></li>
-                <li><a href="2/" class="inactive">Filters and Frequencies</a></li>
+                <li><a href="1/">Colorizing the Prokudin-Gorskii Photo Collection</a>
+                    <br><img src="./1/imgs/emir.jpg"></li>
+                <li><a href="2/">Filters and Frequencies</a>
+                    <br>
+                    <img src="./2/fin-imgs/2.2-fin-dean2-dean1.png">
+                </li>
                 <li><a href="3/" class="inactive">Face Morphing and Modelling a Photo Collection</a></li>
                 <li><a href="4/" class="inactive">Auto-stitching and photo mosaics</a></li>
                 <li><a href="5/" class="inactive">Facial Keypoint Detection with Neural Networks</a></li>

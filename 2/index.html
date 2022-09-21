@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh1DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 #2</title>
+    <style>
+        :root {
+            --outside-bg-color: #1d0b3c;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+        .right {
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .vert {
+            display: flex;
+            margin-top: 1em;
+            justify-content: space-between
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <!-- <a class='right' href="//cs194.mehvix.com/2/">Visit latest</a> -->
+            <a class='right' href="//inst.eecs.berkeley.edu/~cs194-26/fa22/upload/files/proj2/cs194-26-aab/">Visit submission</a>
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">2:
+                Filters and Frequencies</a>
+        </div>
+
+        <article>
+            <div>
+                <span class="right"><img style="height: 18em;" src="fin-imgs/1.1-og.png"></span>
+                <h1>Filters</h1>
+                <p>
+                    To identify the edges in an image, such as of the iconic cameraman photo, we can take the 2D matrix
+                    representation of the image and convolve it with the finite difference operators: $D_x = \begin{bmatrix}1
+                    & -1\end{bmatrix},\ D_y = \begin{bmatrix}1 \\ -1\end{bmatrix}$. Since the left/right and top/bottom
+                    entries of these two operators are opposite, this acts as a filter to detect edges (change in brightness)
+                    along the $y$ and $x$ axis respectively.
+                </p>
+                <p>
+                    With this, we can square the entries of these two partials, sum
+                    them, and take the square root to obtain the magnitude of the gradient at each pixel. To explicitly
+                    define the edges, we take every value above a threshold to 1 and everything else to 0. This threshold is
+                    found through good ol trial-and-error and determines the 'boolified' image.
+                </p>
+                <img src="fin-imgs/1.1-all.png">
+            </div>
+
+            <div>
+                <span class="right" style="margin: 0">
+                    <img style="height: 16.45em; padding-top: 0.25em; background: white;" src="fin-imgs/1.2-blur.png">
+                </span>
+                <span class="right" style="margin: 0 0 1em 4ch">
+                    <img style="height: 16.7em;" src="fin-imgs/1.2-gaus.png">
+                </span>
+                <h2>Gaussian Blurring</h2>
+                <p>
+                    As we can see this works alright. The edges are present, but there's still a good amount of 'salt and
+                    pepper' noise scattered about the boolified image. One way to remedy this particular issue is to blur
+                    the
+                    original image with a 2D gaussian (a gaussian crossed with itself). This has the effect of taking
+                    a weighted average of the region of pixels around the current pixel, so our finite difference
+                    operators
+                    now have information about the surrounding $x$ and $y$ values.
+                </p>
+                <img src="fin-imgs/1.2-all.png">
+            </div>
+            <div>
+                <span class="right" style="margin: 0">
+                    <img style="height: 16.1em;" src="fin-imgs/Dx.png">
+                </span>
+                <span class="right" style="margin: 0 0 1em 4ch">
+                    <img style="height: 16.1em;" src="fin-imgs/Dy.png">
+                </span>
+                <h2>Derivative of Gaussian (DoG)</h2>
+                <p>
+                    Turns out that the order in which we apply these filter operators doesn't matter. That is, rather
+                    than convolving the OG image with a Gaussian first, we can convolve the Gaussian with $D_x, D_y$
+                    beforehand to get a Derivative of Gaussian (DoG) filter. We can then use this filter and convolve it
+                    with the original image to get the exact same results as above.
+                </p>
+                <img src="fin-imgs/1.3-all.png">
+            </div>
+
+            <div>
+                <h1>Frequencies</h1>
+                <h2>Unsharp Masking</h2>
+                <p>
+                    To go about 'sharpening' an image, we can pass it through a <a
+                        href="https://en.wikipedia.org/wiki/Low-pass_filter">low-pass filter</a> (such as the Gaussian blur
+                    from
+                    before) to remove all of the high frequencies. We can then subtract this low-pass filtered image from the
+                    original to obtain just the high frequencies. We can then add some portion, $\alpha$, of the
+                    high-frequency
+                    version back to the original image to get a sharpened image. This works because humans are more sensitive
+                    to high frequencies, and images with higher frequencies are perceived as sharper.
+                </p>
+                <span class="vert">
+                    <span>
+                        <img src="fin-imgs/2.1-all-taj.png">
+                    </span>
+                    <span>
+                        <img src="fin-imgs/2.1-all-sunrise.png">
+                        <!-- ^todo replace w better night scene from trip -->
+                    </span>
+                    <span>
+                        <img src="fin-imgs/2.1-all-sunset.png">
+                    </span>
+                </span>
+            </div>
+            <div>
+                <h2>Hybrid Images</h2>
+                <p>
+                    We can also exploit this property of our visual system to create hybrid images. This involves taking the
+                    low-pass filtered version of one image and the high-pass filtered version of the other. Aligning them and
+                    layering one on top of the other results in a hybrid image which appears different depending on how
+                    close/far away one is from it. This works because the low-pass filtered image will have the 'background'
+                    of the first image, while the high-pass filtered image will have the 'foreground' of the second image.
+                    One way to make this more distinct is to transform the high-pass image into a gray version before to
+                    ensure only the details (and not any of the colors) are present in the final hybrid image.
+                </p>
+                <p>
+                    Below in the first row are the varying images used to compose the hybrids. The second row corresponds to
+                    the image above's log magnitude of it's <a
+                        href="https://homepages.inf.ed.ac.uk/rbf/HIPR2/fourier.htm">Fourier transform</a> so you can see how
+                    the low/high pass filer changes the image characteristics.
+                </p>
+                <img src="fin-imgs/2.2-all-dean2-dean1.png">
+                <img src="fin-imgs/2.2-fin-dean2-dean1.png">
+
+                <div class="vert">
+                    <div><img style="height: 41.3em" src="fin-imgs/2.2-all-Derek-nutmeg.png"></div>
+                    <div><img style="height: 41.3em" src="fin-imgs/2.2-fin-Derek-nutmeg.png"></div>
+                </div>
+
+                <div class="vert" style="align-items: center; margin: 1em 0">
+                    <span style="margin-right: 1em">
+                        <img src="fin-imgs/2.2-all-c2-c1.png">
+                    </span>
+                    <span>
+                        <img src="fin-imgs/2.2-fin-c2-c1.png">
+                    </span>
+                </div>
+                <p>
+                    As we can see with the final result above, images with differing contours don't work out as well.
+                </p>
+            </div>
+            <div>
+                <h2>Gaussian and Laplacian Stacks</h2>
+                <p>
+                    Alternatively to overlaying images, we can also create hybrid images by masking out a portion of one
+                    image
+                    and the inverse of that portion of the other. In the example below, we have a vertical mask diving the
+                    image equally into two halves.
+                </p>
+                <p>
+                    Subsequently, we compute the Gaussian and Laplacian stack of these two masked images, as well as for the
+                    mask itself. The gaussian stacks of each are computed by convolving with a 2D gaussian with a kernel
+                    size exponentially proportional to the stack depth (going up to 5). The Laplacian stacks are then
+                    computed by subtracting the original image from its Gaussian counterpart. Supporting color simply
+                    requires the stacks for each of the three color channels.
+                </p>
+                <span class="vert">
+                    <span>
+                        <img src="fin-imgs/2.4-stack-apple-orange.png">
+                    </span>
+                    <span style="display: hidden"> </span>
+                    <span>
+                        <img src="fin-imgs/2.4-stack-moon3-earth.png">
+                    </span>
+                </span>
+            </div>
+            <div>
+                <h2>Multiresolution Blending</h2>
+                <p>
+                    With these stacks computed, to obtain the final blended image we take a weighted sum of the first and
+                    second images Laplacian stacks, $L_1, L_2$ respectively, with the Gaussian stack of the mask, $G_m$:
+                </p>
+                $$\sum_{i,j}^{m,n} G_R(i, j) \cdot L_1(i, j) + (1 - G_R(i, j)) \cdot L_2(i, j)$$
+                <p>
+                    This produces a nice, smooth blend along the mask seems between two images. As shown in the last example,
+                    we can have more creative, non-vertical masks-- in this case circular, with a strip for the ring.
+                </p>
+                <p>
+                    As a whole, I enjoyed being able to develop some of the techniques that full-fledge image editors
+                    such as GIMP and Photoshop implement: it definitely has given me appreciation for how comparatively
+                    painless the process is in these programs. My favorite portion was manipulating the photos by
+                    their frequency content as it was interesting to see how the human visual system is able to perceive
+                    images in this way.
+                </p>
+                <img src="fin-imgs/2.4-hyb-apple-orange.png">
+                <img src="fin-imgs/2.4-hyb-moon3-earth.png">
+                <img src="fin-imgs/2.4-hyb-saturn-earthb.png">
+            </div>
+        </article>
+
+        <div id="footer">
+            <table id="footerTable">
+                <tr>
+                    <td>$BTC</td>
+                    <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                </tr>
+                <tr>
+                    <td>$XMR</td>
+                    <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ</td>
+                </tr>
+                <tr>
+                    <td>$ETH</td>
+                    <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                </tr>
+                <tr>
+                    <td id="footerDateYear">2021</td>
+                    <td>Max Vogel</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh1DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 #3</title>
+    <style>
+        :root {
+            --outside-bg-color: #0b3c30;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+        .right {
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .vert {
+            display: flex;
+            margin-top: 1em;
+            justify-content: space-between
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a class='right' href="//cs194.mehvix.com/3/">Visit latest</a>
+            <!-- <a class='right' href="//inst.eecs.berkeley.edu/~cs194-26/fa22/upload/files/proj2/cs194-26-aab/">Visit submission</a> -->
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">3: Face
+                Morphing and Modelling a Photo Collection</a>
+        </div>
+
+        <article>
+            <div>
+                <h1>Defining Correspondences</h1>
+                <p>
+                    To go about morphing two (face) images together, we must first must create pairs of points corresponding
+                    to equivalent features we interpolate between. This involves manually labelling each image with 63
+                    points, and in a specific order. The order is important because the images are not necessarily aligned,
+                    and even if they were there is enough spatial variation between the features that cannot naively choose
+                    the closest point. I learned this the hard way after selecting the points in the wrong order, and rather
+                    than taking a minute to reselect the points I spent an hour implementing a <a
+                        href="https://joshhug.gitbooks.io/hug61b/content/chap16/chap163.html">KDTree</a> such that the points
+                    could be iterated over, each pass picking the pair closest to one another and no one else.
+                </p>
+                <p>
+                    After the points are chosen, additional points are added around the border of the image. This is done so
+                    that the entire image, and not just the facial features, are interpolated. Next a <a
+                        href="https://en.wikipedia.org/wiki/Delaunay_triangulation">Delaunay
+                        triangulation</a> on the average of the points is created as it produces minimal small-angle
+                    triangles.
+                </p>
+                <img src="imgs/1.png">
+            </div>
+            <div>
+                <div class="right" style="text-align: center;width: 30%">
+                    <img src="imgs/3-morph-og_30.gif">
+                    <br>
+                </div>
+                <h1>Computing the "Mid-way Face" and the Morph Sequence</h1>
+                <div>
+                    With this, we can calculate an <a
+                        href="https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation">Affine
+                        transformation matrix</a> between the points in the average triangle to
+                    their corresponding original triangles. We can use this to also map the pixels enclosed in each
+                    triangle to the corresponding pixel from the original triangles. Generating the morph is simply
+                    a matter of interpolating the shape (triangle) and color (pixels) from one image, to the average, and
+                    then to the other image.
+                    <br>
+                    <br>
+                    <img style="width: 65%; margin: 1ch" src="imgs/2-midway.png">
+                </div>
+                <br>
+            </div>
+            <div>
+                <h1>The "Mean face" of a population</h1>
+                <p>
+                    Using the <a
+                        href="https://web.archive.org/web/20210305094647/http://www2.imm.dtu.dk/~aam/datasets/datasets.html">Dane's
+                        dataset</a> the mean face of the 'population' can be calculated. This is accomplished by averaging
+                    the points of each face, and then using the same process as above to generate the mean face.
+                </p>
+                <img src="imgs/4.png">
+                <div style="display: flex; text-align: center">
+
+                    <span id='a'>
+                    </span>
+                    <span id="b">
+                    </span>
+                    <span id='c'>
+                    </span>
+                    <span id="d">
+                    </span>
+                    </span>
+                    <span id="e">
+                    </span>
+                    <script defer>
+                        var ima = document.createElement('IMG');
+                        ima.src = 'imgs/5-ex0_30.gif';
+                        document.getElementById('a').appendChild(ima);
+
+                        var imb = document.createElement('IMG');
+                        imb.src = 'imgs/5-ex1_30.gif';
+                        document.getElementById('b').appendChild(imb);
+
+                        var imc = document.createElement('IMG');
+                        imc.src = 'imgs/5-ex2_30.gif';
+                        document.getElementById('c').appendChild(imc);
+
+                        var imd = document.createElement('IMG');
+                        imd.src = 'imgs/5-ex3_30.gif';
+                        document.getElementById('d').appendChild(imd);
+
+                        var ime = document.createElement('IMG');
+                        ime.src = 'imgs/4-morph-avg_30.gif';
+                        document.getElementById('e').appendChild(ime);
+                    </script>
+                </div>
+            </div>
+            <div>
+                <h1>Caricatures: Extrapolating from the mean</h1>
+                <p>
+                    Normally, when we interpolate between images our
+                    $\alpha \in [0, 1]$ where $0$ corresponds to the first image's original and $1$ the second's original and
+                    everything else a stage of the morph sequence. We can extend this outside of the normal range to obtain
+                    'caricatures':
+                </p>
+                <img src="imgs/5.png">
+            </div>
+            <div>
+                <h1>Bells and Whistles</h1>
+                <p>
+                    Rather than using a linear interpolation, I implement a <a
+                        href="https://en.wikipedia.org/wiki/Sigmoid_function">sigmoid function</a> to smooth the transition.
+                    This has the effect of making $\alpha$ spend less time at the most unnatural looking frames (around the
+                    middle) and more time around the edges of 0 and 1.
+                </p>
+                <div style="display: flex; text-align: center">
+                    <span id='x'>
+                        Linear
+                    </span>
+                    <span id="y">
+                        Sigmoid
+                    </span>
+                    <!-- var imx2 = document.createElement('IMG');
+                    imx2.src = 'imgs/imgs/3-morph-og_10.gif';
+                    document.getElementById('x').appendChild(imx2); -->
+                    <script>
+                        window.onload = function() {
+                            var imx = document.createElement('IMG');
+                            imx.src = 'imgs/3-morph-og_30.gif';
+                            document.getElementById('x').appendChild(imx);
+
+                            var imy = document.createElement('IMG');
+                            imy.src = 'imgs/3-morph-og_30.gif';
+                            document.getElementById('y').appendChild(imy);
+                        }
+                    </script>
+                </div>
+            </div>
+            <!-- <div>
+                <h1></h1>
+                <p></p>
+            </div> -->
+        </article>
+
+        <div id="footer">
+            <table id="footerTable">
+                <tr>
+                    <td>$BTC</td>
+                    <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                </tr>
+                <tr>
+                    <td>$XMR</td>
+                    <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ</td>
+                </tr>
+                <tr>
+                    <td>$ETH</td>
+                    <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                </tr>
+                <tr>
+                    <td id="footerDateYear">2021</td>
+                    <td>Max Vogel</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

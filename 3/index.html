@@ -141,27 +141,6 @@
                     </span>
                     <span id="e">
                     </span>
-                    <script defer>
-                        var ima = document.createElement('IMG');
-                        ima.src = 'imgs/5-ex0_30.gif';
-                        document.getElementById('a').appendChild(ima);
-
-                        var imb = document.createElement('IMG');
-                        imb.src = 'imgs/5-ex1_30.gif';
-                        document.getElementById('b').appendChild(imb);
-
-                        var imc = document.createElement('IMG');
-                        imc.src = 'imgs/5-ex2_30.gif';
-                        document.getElementById('c').appendChild(imc);
-
-                        var imd = document.createElement('IMG');
-                        imd.src = 'imgs/5-ex3_30.gif';
-                        document.getElementById('d').appendChild(imd);
-
-                        var ime = document.createElement('IMG');
-                        ime.src = 'imgs/4-morph-avg_30.gif';
-                        document.getElementById('e').appendChild(ime);
-                    </script>
                 </div>
             </div>
             <div>
@@ -190,23 +169,6 @@
                     <span id="y">
                         Sigmoid
                     </span>
-                    <script>
-                        window.onload = function() {
-                            var imx = document.createElement('IMG');
-                            imx.src = 'imgs/3-morph-og_30.gif';
-                            document.getElementById('x').appendChild(imx);
-                            var imx2 = document.createElement('IMG');
-                            imx2.src = 'imgs/3-morph-og_10.gif';
-                            document.getElementById('x').appendChild(imx2);
-
-                            var imy = document.createElement('IMG');
-                            imy.src = 'imgs/6-morph-nn_30.gif';
-                            document.getElementById('y').appendChild(imy);
-                            var imy2 = document.createElement('IMG');
-                            imy2.src = 'imgs/6-morph-nn_10.gif';
-                            document.getElementById('y').appendChild(imy2);
-                        }
-                    </script>
                 </div>
             </div>
             <!-- <div>
@@ -236,6 +198,45 @@
             </table>
         </div>
     </div>
+
+    <script>
+        var imx = document.createElement('IMG');
+        imx.src = 'imgs/3-morph-og_30.gif';
+        var imx2 = document.createElement('IMG');
+        imx2.src = 'imgs/3-morph-og_10.gif';
+
+        var imy = document.createElement('IMG');
+        imy.src = 'imgs/6-morph-nn_30.gif';
+        var imy2 = document.createElement('IMG');
+        imy2.src = 'imgs/6-morph-nn_10.gif';
+
+        var ima = document.createElement('IMG');
+        ima.src = 'imgs/5-ex0_30.gif';
+
+        var imb = document.createElement('IMG');
+        imb.src = 'imgs/5-ex1_30.gif';
+
+        var imc = document.createElement('IMG');
+        imc.src = 'imgs/5-ex2_30.gif';
+
+        var imd = document.createElement('IMG');
+        imd.src = 'imgs/5-ex3_30.gif';
+
+        var ime = document.createElement('IMG');
+        ime.src = 'imgs/4-morph-avg_30.gif';
+
+        window.onload = function() {
+            document.getElementById('y').appendChild(imy);
+            document.getElementById('x').appendChild(imx);
+            document.getElementById('x').appendChild(imx2);
+            document.getElementById('y').appendChild(imy2);
+            document.getElementById('a').appendChild(ima);
+            document.getElementById('b').appendChild(imb);
+            document.getElementById('c').appendChild(imc);
+            document.getElementById('d').appendChild(imd);
+            document.getElementById('e').appendChild(ime);
+        }
+    </script>
 </body>
 
 </html>

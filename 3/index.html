@@ -134,11 +134,11 @@
 
                     <span id='a'>
                     </span>
-                    <span id="b">
-                    </span>
                     <span id='c'>
                     </span>
                     <span id="d">
+                    </span>
+                    <span id="b">
                     </span>
                     </span>
                     <span id="e">
@@ -182,7 +182,8 @@
                     Rather than using a linear interpolation, I implement a <a
                         href="https://en.wikipedia.org/wiki/Sigmoid_function">sigmoid function</a> to smooth the transition.
                     This has the effect of making $\alpha$ spend less time at the most unnatural looking frames (around the
-                    middle) and more time around the edges of 0 and 1.
+                    middle) and more time around the edges of 0 and 1. Below are a comparison, the top with 30 frames/second
+                    and the bottom with 10.
                 </p>
                 <div style="display: flex; text-align: center">
                     <span id='x'>
@@ -191,18 +192,21 @@
                     <span id="y">
                         Sigmoid
                     </span>
-                    <!-- var imx2 = document.createElement('IMG');
-                    imx2.src = 'imgs/imgs/3-morph-og_10.gif';
-                    document.getElementById('x').appendChild(imx2); -->
                     <script>
                         window.onload = function() {
                             var imx = document.createElement('IMG');
                             imx.src = 'imgs/3-morph-og_30.gif';
                             document.getElementById('x').appendChild(imx);
+                            var imx2 = document.createElement('IMG');
+                            imx2.src = 'imgs/3-morph-og_10.gif';
+                            document.getElementById('x').appendChild(imx2);
 
                             var imy = document.createElement('IMG');
-                            imy.src = 'imgs/3-morph-og_30.gif';
+                            imy.src = 'imgs/6-morph-nn_30.gif';
                             document.getElementById('y').appendChild(imy);
+                            var imy2 = document.createElement('IMG');
+                            imy2.src = 'imgs/6-morph-nn_10.gif';
+                            document.getElementById('y').appendChild(imy2);
                         }
                     </script>
                 </div>

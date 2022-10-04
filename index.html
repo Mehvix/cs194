@@ -24,16 +24,16 @@
         }
 
         article>div {
-            display: flex;
-            justify-content: space-around
+            column-count: 2;
+            text-align: left;
         }
 
-        article>div span {
-            width: 45%;
+        article>div>div {
+            margin-bottom: .5em;
         }
 
-        img {
-            width: 25em;
+        article img:hover {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -45,21 +45,33 @@
         </div>
 
         <article>
-
-            <!-- todo make this a grid -->
-            <!-- todo click-able images -->
-            <ol>
-                <li><a href="1/">Colorizing the Prokudin-Gorskii Photo Collection</a>
-                    <br><img src="./1/imgs/emir.jpg"></li>
-                <li><a href="2/">Filters and Frequencies</a>
-                    <br>
-                    <img src="./2/fin-imgs/2.2-fin-dean2-dean1.png">
-                </li>
-                <li><a href="3/" class="inactive">Face Morphing and Modelling a Photo Collection</a></li>
-                <li><a href="4/" class="inactive">Auto-stitching and photo mosaics</a></li>
-                <li><a href="5/" class="inactive">Facial Keypoint Detection with Neural Networks</a></li>
-                <li><a href="6/" class="inactive">The Final</a></li>
-            </ol>
+            <div>
+                <div>(1)
+                    <a href="1/">Colorizing the Prokudin-Gorskii Photo Collection</a>
+                    <img src="./1/imgs/emir.jpg" onclick="window.open('1/','_self')">
+                </div>
+                <div>(3)
+                    <a href="3/">Face Morphing and Modelling a Photo Collection</a>
+                    <img src="./3/imgs/6-morph-nn_30.gif" onclick="window.open('3/','_self')">
+                    <!-- <img src="./3/"> -->
+                </div>
+                <div>(2)
+                    <a href="2/">Filters and Frequencies</a>
+                    <img src="./2/fin-imgs/2.2-fin-dean2-dean1.png" onclick="window.open('2/','_self')">
+                </div>
+                <!-- <div>(4)
+                    <img src="./4/"  onclick="window.open('4/','_self')">
+                    <a href="4/" class="inactive">Auto-stitching and photo mosaics</a>
+                </div>
+                <div>(5)
+                    <img src="./5/" onclick="window.open('5/','_self')">
+                    <a href="5/" class="inactive">Facial Keypoint Detection with Neural Networks</a>
+                </div>
+                <div>(6)
+                    <img src="./6/"  onclick="window.open('6/','_self')">
+                    <a href="6/" class="inactive">The Final</a>
+                </div> -->
+            </div>
         </article>
 
         <div id="footer">

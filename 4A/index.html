@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh1DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 | 4A</title>
+    <style>
+        :root {
+            --outside-bg-color: #5a0000;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .right {
+            clear: both;
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            clear: both;
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .row {
+            display: flex;
+            margin-top: 1em;
+            justify-content: space-evenly;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+
+        .no-margin-top {
+            margin-top: 0
+        }
+
+        .no-margin-top>* {
+            margin-top: 0 !important
+        }
+
+        .MathJax a {
+            all: unset;
+        }
+
+        .MathJax a:hover {
+            all: unset;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">Image
+                Warping and Mosaicing</a>
+        </div>
+
+        <iv>
+            <div>
+                <span class="right" style="margin-left: 0">
+                    $$\overbrace{\begin{bmatrix}
+                    x'w \\
+                    y'w \\
+                    w \\
+                    \end{bmatrix}}^{\large \vec p' w} = \overbrace{\begin{bmatrix}
+                    a & b & c \\
+                    d & e & f \\
+                    g & h & 1 \\
+                    \end{bmatrix}}^{\large H}\ \overbrace{\begin{bmatrix}
+                    x \\
+                    y \\
+                    1 \\
+                    \end{bmatrix}\tag{1}\label{1}}^{\large \vec p}$$
+                    $$w = gx + hy+1 \tag{2}\label{2}$$
+                    $$\begin{align*}
+                    x'w &= ax + by + c \\
+                    &= x'(gx+hy+1) \\
+                    x' &= -x(gx' - a) - y(hx' - b) + c\\
+                       &= ax + by + c - gxx' - hyx'
+                    \tag{3}\label{3}
+                    \end{align*}
+                    $$
+                    $$
+                    \begin{align*}
+                    y'w &= dx + ey + f \\
+                    &= y'(gx+hy+1) \\
+                    y' &= -x(y'g-d) - y(y'h-e) + f\\
+                       &= dx + ey + f - gxy' - hyy'
+                    \tag{4}\label{4}
+                    \end{align*}
+                    $$
+                </span>
+
+                <h1>Recovering the Homography</h1>
+                <p>
+                    In this project we are interested in creating panorama images by stitching together multiple images of
+                    varying viewpoints. In this first part, similar to <a href="../3/">project 3</a> we manually define
+                    corresponding pairs of feature points present in two images, called $\vec p$ and $\vec p'$. Thankfully,
+                    unlike project 3 where we had to select 50+ points for each image, here we only need to choose a minimum
+                    of four points for each as to calculate the <a
+                        href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Homography Matrix</a>, $H$. This
+                    matrix is a $3\times 3$ <a
+                        href="https://en.wikipedia.org/wiki/3D_projection#Perspective_projection">perspective
+                        transformation</a>
+                    matrix that defines the mapping between the two images that we employ to generate the resulting mosaic.
+                </p>
+                <p>
+                    Any two images of the same planar surface in space are related by this homography matrix, $\eqref{1}$.
+                    Notice that there are eight degrees of freedom (unknowns) as the bottom-right should always be normalized
+                    to 1 as this is a type of <a
+                        href="https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation">affine
+                        transformation</a> and how we arrive at our minimum of four points per images. Manually
+                    selecting
+                    the points is prone to small human errors, so we can overdefine the system of equations (by selecting
+                    more than four points) and subsequently use <a href="https://en.wikipedia.org/wiki/Least_squares">least
+                        squares</a> to solve our system of equations, $\eqref{5}$.
+                </p>
+                <span style="display: flex; align-items: center; justify-content: space-around; width: 100%">
+                    $$\overbrace{\begin{bmatrix}
+                    x_1 & y_1 & 1 & 0 & 0 & 0 & -x_1 x_1' & -y_1 x_1' \\
+                    0 & 0 & 0 & x_1 & y_1 & 1 & -x_1 y_1' & -y_1 y_1' \\
+                    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+                    x_n & y_n & 1 & 0 & 0 & 0 & -x_n x_n' & -y_n x_n' \\
+                    0 & 0 & 0 & x_n & y_n & 1 & -x_n y_n' & -y_n y_n' \\
+                    \end{bmatrix}}^{\large D \in \mathbb R^{2n \times 8}}\overbrace{\begin{bmatrix}
+                    a \\
+                    b \\
+                    c \\
+                    d \\
+                    e \\
+                    f \\
+                    g \\
+                    \end{bmatrix}}^{\large \vec H \in \mathbb R^8} = \overbrace{\begin{bmatrix}
+                    x_1' \\
+                    y_1' \\
+                    \vdots \\
+                    x_n' \\
+                    y_n' \\
+                    \end{bmatrix}}^{\large \vec p' \in \mathbb R^{2n}}
+                    \tag{5}\label{5}
+                    $$
+
+                    $$\displaylines{\\
+                    \large \vec H = \begin{cases}
+                    D\vec p' & n=4 &:&\text{exact solution} \\
+                    (D^T D)^{-1} D^T \vec p' & n>4 &:& \text{least squares}
+                    \end{cases}}$$
+                </span>
+            </div>
+
+            <div>
+                <h1>Rectification</h1>
+                <p>
+                    Now that we can compute the homography matrix of two pairs of points, we can to <a
+                        href="https://en.wikipedia.org/wiki/Image_rectification">rectify</a> images. This is
+                    the process of changing the perspective such that some 'slanted' portion of the image appears head-on.
+                    This is done by selecting a set of points belonging to a trapezoid which we transform into a rectangle
+                    (defined by the trapezoid's dimensions) via a homography matrix. You can see in the left images the set
+                    of colored points $\vec p$ belonging to the trapezoid, and the right image the resulting rectified image.
+                </p>
+                <div class="row" style="height: 20em">
+                    <span>
+                        <img src="imgs/0-rect_pts.png" alt="">
+                    </span>
+                    <span>
+                        <img src="imgs/0-rectify.png" alt="">
+                    </span>
+                </div>
+                <div class="row" style="height: 20em">
+                    <span>
+                        <img src="imgs/1-pts.png" alt="">
+                    </span>
+                    <span>
+                        <img src="imgs/1-rectify.png" alt="">
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <h1>Blend Images into a Mosaic</h1>
+                <p>
+                    After applying the homography transformation to both of the images as well as their feature points, we go
+                    about offsetting one image such that it's feature points align with the other image's feature points.
+                    Next, using the Gaussian stack method to blend images from <a href="../2/">project 2</a>, we can create a
+                    mosaic by blending these two images.
+                </p>
+                <div class="col">
+                    <img src="imgs/0-steps.png" alt="">
+                    <img src="imgs/0-pyramid.png" alt="">
+                    <img src="imgs/0-blended.png" alt="">
+                    <hr>
+                    <img src="imgs/5-steps.png" alt="">
+                    <span class="row" style="height: 20em; margin: 0; line-height: 0">
+                        <img src="imgs/5-blended.png" alt="">
+                        <img src="imgs/5-blended-rev.png" alt="">
+                    </span>
+                    <hr>
+                    <img src="imgs/4-steps.png" alt="">
+                    <img src="imgs/4-blended.png" alt="">
+                </div>
+                <h2>Ghosting due to Poor Pairs</h2>
+                <p>
+                    Some of the points from one image do not align 'well' with where they should on the other image after the
+                    homography transformation is applied. Notably in the first example below, the red dot on the left-side
+                    house's roof is to the right of where it should be, resulting in ghosting artifacts around those regions.
+                    In the second example, the points are nearly identical in both images as there is little distortion due
+                    to the fact that the angle/direction is similar between both photos. This is an issue stemming from the
+                    fact that we are naively using all of the points I (a lazy human) initially
+                    selected because they were easy to decern. In the second half of this project, we will implement a
+                    much more robust method of selecting points. To be continued!
+                </p>
+                <!-- <blockquote>
+                    All happy correspondences are alike; each unhappy unhappy correspondences is unhappy in its own way.
+                </blockquote> -->
+                <div>
+                    <img src="imgs/4-pts_diff.png" alt="">
+                    <img src="imgs/0-pts_diff.png" alt="">
+                </div>
+            </div>
+            <div>
+                <h1>Takeaways</h1>
+                <p>
+                    I thought it was interesting how relatively simple the homograph matrix is to compute, and how much poor
+                    points can affect the final result. Excited to start implementing part 2!
+                </p>
+            </div>
+            </article>
+
+            <div id="footer">
+                <table id="footerTable">
+                    <tr>
+                        <td>$BTC</td>
+                        <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                    </tr>
+                    <tr>
+                        <td>$XMR</td>
+                        <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>$ETH</td>
+                        <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                    </tr>
+                    <tr>
+                        <td id="footerDateYear">2021</td>
+                        <td>Max Vogel</td>
+                    </tr>
+                </table>
+            </div>
+    </div>
+</body>
+
+</html>

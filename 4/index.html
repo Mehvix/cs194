@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh1DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+                packages: {
+                    "[+]": ["mathtools"],
+                },
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg", '[tex]/mathtools']
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 | 4</title>
+    <style>
+        :root {
+            --outside-bg-color: #d7ab42;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+        img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .right {
+            clear: both;
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            clear: both;
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .row {
+            display: flex;
+            margin-top: 1em;
+            justify-content: space-evenly;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+        }
+
+        .no-margin-top {
+            margin-top: 0
+        }
+
+        .no-margin-top>* {
+            margin-top: 0 !important
+        }
+
+        .MathJax a {
+            all: unset;
+        }
+
+        .MathJax a:hover {
+            all: unset;
+        }
+
+        .hover img:last-child {
+            display: none;
+        }
+
+        .hover:hover img:last-child {
+            display: block;
+        }
+
+        .hover:hover img:first-child {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">Image
+                Auto-stitching and Mosaicing</a>
+        </div>
+
+        <div>
+            <div>
+                <span class="right" style="margin-left: 0">
+                    $$\overbrace{\begin{bmatrix}
+                    x'w \\
+                    y'w \\
+                    w \\
+                    \end{bmatrix}}^{\large \vec p' w} = \overbrace{\begin{bmatrix}
+                    a & b & c \\
+                    d & e & f \\
+                    g & h & 1 \\
+                    \end{bmatrix}}^{\large H}\ \overbrace{\begin{bmatrix}
+                    x \\
+                    y \\
+                    1 \\
+                    \end{bmatrix}\tag{1}\label{1}}^{\large \vec p}$$
+                    $$w = gx + hy+1 \tag{2}\label{2}$$
+                    $$\begin{align*}
+                    x'w &= ax + by + c \\
+                    &= x'(gx+hy+1) \\
+                    x' &= -x(gx' - a) - y(hx' - b) + c\\
+                    &= ax + by + c - gxx' - hyx'
+                    \tag{3}\label{3}
+                    \end{align*}
+                    $$
+                    $$
+                    \begin{align*}
+                    y'w &= dx + ey + f \\
+                    &= y'(gx+hy+1) \\
+                    y' &= -x(y'g-d) - y(y'h-e) + f\\
+                    &= dx + ey + f - gxy' - hyy'
+                    \tag{4}\label{4}
+                    \end{align*}
+                    $$
+                </span>
+
+                <h1>Computing Homography Transformation</h1>
+                <p>
+                    In this project we are interested in creating panorama images by stitching together multiple images of
+                    varying viewpoints. In this first part, similar to <a href="../3/">project 3</a> we manually define
+                    corresponding pairs of feature points present in two images, called $\vec p$ and $\vec p'$. Thankfully,
+                    unlike project 3 where we had to select 50+ points for each image, here we only need to choose a minimum
+                    of four points for each as to calculate the <a
+                        href="https://en.wikipedia.org/wiki/Homography_(computer_vision)">Homography Matrix</a>, $H$. This
+                    matrix is a $3\times 3$ <a
+                        href="https://en.wikipedia.org/wiki/3D_projection#Perspective_projection">perspective
+                        transformation</a>
+                    matrix that defines the mapping between the two images that we employ to generate the resulting mosaic.
+                </p>
+                <p>
+                    Any two images of the same planar surface in space are related by this homography matrix, $\eqref{1}$.
+                    Notice that there are eight degrees of freedom (unknowns) as the bottom-right should always be normalized
+                    to 1 as this is a type of <a
+                        href="https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation">affine
+                        transformation</a> and how we arrive at our minimum of four points per images. Manually
+                    selecting
+                    the points is prone to small human errors, so we can overdefine the system of equations (by selecting
+                    more than four points) and subsequently use <a href="https://en.wikipedia.org/wiki/Least_squares">least
+                        squares</a> to solve our system of equations, $\eqref{5}$.
+                </p>
+                <span style="display: flex; align-items: center; justify-content: space-around; width: 100%">
+                    $$\overbrace{\begin{bmatrix}
+                    x_1 & y_1 & 1 & 0 & 0 & 0 & -x_1 x_1' & -y_1 x_1' \\
+                    0 & 0 & 0 & x_1 & y_1 & 1 & -x_1 y_1' & -y_1 y_1' \\
+                    \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+                    x_n & y_n & 1 & 0 & 0 & 0 & -x_n x_n' & -y_n x_n' \\
+                    0 & 0 & 0 & x_n & y_n & 1 & -x_n y_n' & -y_n y_n' \\
+                    \end{bmatrix}}^{\large D \in \mathbb R^{2n \times 8}}\overbrace{\begin{bmatrix}
+                    a \\ b \\ c \\ d \\ e \\ f \\ g \\ \end{bmatrix}}^{\large \vec H \in \mathbb R^8} =
+                    \overbrace{\begin{bmatrix} x_1' \\ y_1' \\ \vdots \\ x_n' \\ y_n' \\
+                    \end{bmatrix}}^{\large \vec p' \in \mathbb R^{2n}}
+                    \tag{5}\label{5}
+                    $$
+
+                    $$\displaylines{\\
+                    \large \vec H = \begin{cases}
+                    D\vec p' & n=4 &:&\text{exact solution} \\
+                    (D^T D)^{-1} D^T \vec p' & n>4 &:& \text{least squares}
+                    \end{cases}}$$
+                </span>
+            </div>
+
+            <div>
+                <h1>Rectification</h1>
+                <p>
+                    Now that we can compute the homography matrix of two pairs of points, we can <a
+                        href="https://en.wikipedia.org/wiki/Image_rectification">rectify</a> images. This is
+                    the process of changing the perspective such that some 'slanted' portion of the image appears head-on.
+                    This is done by selecting a set of points belonging to a trapezoid which we transform into a rectangle
+                    (defined by the trapezoid's dimensions) via a homography matrix. You can see in the left images the set
+                    of colored points $\vec p$ belonging to the trapezoid, and the right image the resulting rectified image.
+                </p>
+                <div class="row" style="height: 20em">
+                    <span>
+                        <img src="imgs/0-rect_pts.png" alt="">
+                    </span>
+                    <span>
+                        <img src="imgs/0-rectify.png" alt="">
+                    </span>
+                </div>
+                <div class="row" style="height: 20em">
+                    <span>
+                        <img src="imgs/1-pts.png" alt="">
+                    </span>
+                    <span>
+                        <img src="imgs/1-rectify.png" alt="">
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <h1>Blend Images into a Mosaic</h1>
+                <p>
+                    After applying the homography transformation to both of the images as well as their feature points, we go
+                    about offsetting one image such that it's feature points align with the other image's feature points.
+                    Next, using the Gaussian stack method to blend images from <a href="../2/">project 2</a>, we can create a
+                    mosaic by blending these two images.
+                </p>
+                <div class="col">
+                    <img src="imgs/0-steps.png" alt="">
+                    <img src="imgs/0-pyramid.png" alt="">
+                    <img src="imgs/0-blended.png" alt="">
+                    <hr>
+                    <!-- <img src="imgs/5-steps.png" alt=""> -->
+                    <!-- <span class="row" style="height: 20em; margin: 0; line-height: 0">
+                        <img src="imgs/5-blended.png" alt="">
+                        <img src="imgs/5-blended-rev.png" alt="">
+                    </span> -->
+                    <!-- <hr>
+                    <img src="imgs/4-steps.png" alt="">
+                    <img src="imgs/4-blended.png" alt=""> -->
+                    <p>
+                        Next up, in the second half of this project, we will go about selecting these feature points
+                        automatically rather than manually.
+                    </p>
+                </div>
+            </div>
+            <hr>
+            <!-- todo hr styling + add mathjax to main css file -->
+            <div>
+                <h1>Feature Detection</h1>
+                <p>
+                    <a href="https://en.wikipedia.org/wiki/Feature_(computer_vision)#Detectors">Feature detection</a> is the
+                    process of finding candidate points that we expect to exist in both of the to-be-merged images. <a
+                        href="https://en.wikipedia.org/wiki/Feature_(computer_vision)#Types">There are many different types
+                        of image features</a>, but we will focus on corners: formally, points where the intensity of the
+                    image changes rapidly along more than one axis. The algorithm which we will use to find these points
+                    (corner vertices) will be the <a href="https://en.wikipedia.org/wiki/Harris_corner_detector">Harris
+                        corner detector</a>. In a nutshell, this algorithm considers a window of pixels around many points in
+                    the image, and computes how much the intensity changes in each direction. If the intensity changes a lot
+                    in all directions, then the point is likely a corner (whereas had it only changed in one direction, it
+                    would be an edge parallel to said direction). We like corners since, compared to edges or other features,
+                    they are easy to identify and are invariant to slight deviations of perspective.
+                </p>
+                <p>
+                    To describe this mathematically, we let $W$ be the (typically $3 \times 3$) window of pixels around
+                    the input point $(u,v)$ and $I(x,y)$ is the intensity of the image:
+                    <!-- spaghetti latex, look away!! -->
+                    $$\begin{align}
+                    E(u,v) &= \sum_{(x,y)\in W} \overbrace{\big(I(x+u,y+v)}^{\mathclap{\Large\qquad\qquad\qquad\approx\
+                    I(x,y) + I_x u + I_y v\ =\ \begin{bmatrix} I_x & I_y \end{bmatrix} \begin{bmatrix} u \\ v
+                    \end{bmatrix}}} + I(x,y) \big)^2 \\
+                    &\approx \sum_{(x,y)\in W} \left(I(x,y) + \begin{bmatrix} I_x & I_y
+                    \end{bmatrix} \begin{bmatrix} u \\ v \end{bmatrix} - I(x,y)\right)^2 \\
+                    &=\sum_{(x,y)\in W} \left(\begin{bmatrix} I_x & I_y \end{bmatrix} \begin{bmatrix} u \\ v
+                    \end{bmatrix}\right)^2 \\
+                    &= \sum_{(x,y)\in W} \begin{bmatrix} u & v \end{bmatrix} \underbrace{\begin{bmatrix} I_x^2 & I_x I_y \\
+                    I_x I_y & I_y^2\end{bmatrix}}_{\mathclap{ \large \quad \begin{subarray}{l}M = R^{-1}
+                    \begin{bmatrix}\lambda_1 & 0 \\ 0 &
+                    \lambda_2\end{bmatrix}R\\R = \frac{\det M}{\text{trace} M} = \frac{\lambda_1 \cdot \lambda_2}{\lambda_1 +
+                    \lambda_2}\end{subarray}}}
+                    \begin{bmatrix} u \\ v \end{bmatrix} \\
+                    \end{align}$$
+
+                    By taking the <a href="https://en.wikipedia.org/wiki/Singular_value_decomposition">SVD</a> of the
+                    first-order Taylor approximation of $E(u,v)$, we can find the eigenvalues of $M$. $1/\sqrt
+                    \lambda_{\max}$ turns out to be the direction of quickest change in intensity, and $1/\sqrt
+                    \lambda_{\min}$ is the direction of slowest change in intensity. Thus if both of the eigens are large and
+                    their ratio is close to 1, then we classify the point is a corner. Alternatively, had one of these eigens
+                    been large and the other small then we would have discovered an edge; $\lambda_1\gg \lambda_2 \implies$
+                    vertical edge, $\lambda_1\ll \lambda_2 \implies$ horizontal edge. Below you can see the results of the
+                    Harris detector:
+                </p>
+                <img src="imgs/20-ph.png">
+                <p>
+                    Because we are operating on derivatives, we are invariant to any <i>intensity</i> shifting/scaling
+                    variation, but are not invariant to <i>image</i> scaling nor rotation. We can go about resolving this by
+                    implementing a <a href="https://en.wikipedia.org//wiki/Pyramid_(image_processing)">image pyramid</a>, ala
+                    <a href="../1/">project 1</a>, allowing us to effectively consider various region sizes/angles while
+                    actually speeding up the computation (as we are working at a downscaled image).
+                </p>
+                <p>
+                    After we have a large number of points for both images, we can run them through a Adaptive Non-Maximal
+                    Suppression (ANMS) algorithm to weed out only the best $n$ points to use, in this case $n=500$. Since
+                    we want to find the same points across two images, we want the points to be spaced out so we
+                    are likely to be able to have the same feature points in both images. To accomplish this, for each point
+                    $x_i$ we find the smallest radius to the next nearest neighboring point $x_j$ such that the corner
+                    response, $f(\cdot)$, from the Harris detector of the original point is less than some constant,
+                    $c_\text{robust}$, multiplied by the response for the other point:
+                    $$r_i = \min_j | x_i - x_j | : f(x_i) < c_\text{robust} f(x_j) %>$$
+                        Then to select the most spaced apart points to use, we sort the points by their radius $r_i$ and take
+                        the largest $n$. Below you can see the results of using a pyramid in tandem with ANMS:
+                </p>
+                <img src="imgs/21-ps.png">
+            </div>
+            <div>
+                <h1>Feature Matching</h1>
+                <!-- todo "Include on your webpage a figure of the chosen corners overlaid on the image" -->
+                <p>
+                    Now that we have narrowed down to the best feature points in both images, our next step is to find
+                    which of these feature points correspond to one another. To do this, we will need a way to 'describe' the
+                    region around each point. This description must be fairly distinct for each point, which we can ensure by
+                    considering a sufficiently large area around each point-- in this case, a $8\times 8$ patch. We also must
+                    ensure that our description is both invariant and distinctive across small changes in illumination across
+                    3D projective transforms. We can accomplish this by normalizing the bias/gain of the image as $I' = (I -
+                    \mu)/\sigma$.
+                </p>
+                <h2>Pairing Up</h2>
+                <p>
+                    As for figuring out which points we should pair up, greedily taking the nearest neighbor doesn't work
+                    well (as I discovered in <a href="../3/">project 3</a>). This issue can be related to the <a
+                        href="https://en.wikipedia.org/wiki/Anna_Karenina_principle">Anna Karenina
+                        principle</a>:
+                    <blockquote style="font-size: unset">
+                        <i>
+                            All happy correspondences are alike; each unhappy correspondences is unhappy in its own way.
+                        </i>
+                    </blockquote>
+                    That is, while it is true that matching points are close to one another, not all close points are
+                    matching. To filter out these spurious correspondences, we need to find a better metric that holds for
+                    all legitimate pairs and fails otherwise. <a href="https://www.cs.ubc.ca/~lowe/papers/iccv99.pdf">Lowe
+                        (1999)</a> laid out a way to do this: take the ratio of the distance of a point to it's first over
+                    second nearest neighbor-- that is, choose points where the best match is much better than the rest.
+                    Thresholding this ratio to 0.4 tends to work well.
+                </p>
+                <img src="imgs/22-pm.png">
+                <h2>Bad Matches</h2>
+                <p>
+                    Even after this, we still may have some erroneous matches. As long as we have more legitimate matches,
+                    however, we can deduce the bad apples using <a
+                        href="https://en.wikipedia.org/wiki/Random_sample_consensus">Random Sample Consensus</a> (RASAC).
+                    This process of the
+                    algorithm involves selecting four (or more) pairs of matching features in both images, computing their
+                    Homography $H$ as well as the 'inliers' where $||Hp_i - p_i'|| \le \varepsilon$. Experimentally,
+                    $\varepsilon=1$ (less than a pixel difference) works well. We then keep the largest
+                    set of inliers, and re-compute the least-squares $\hat H$ across all inliers.
+                </p>
+                <img src="imgs/23-pf.png">
+            </div>
+            <div>
+                <h1>Results</h1>
+                <p>
+                    Below are the results the automatically chosen points. If you hover over the image, you can see the
+                    comparison with the manually chosen points.
+                </p>
+                <div class="col">
+                    <span class="hover">
+                        <img src="imgs/B-4-blended-auto.png">
+                        <img src="imgs/B-4-blended.png">
+                    </span>
+                    <span class="hover">
+                        <img src="imgs/B-5-blended-auto.png">
+                        <img src="imgs/5-blended.png">
+                    </span>
+                    <span class="hover">
+                        <img src="imgs/B-0-blended-auto.png">
+                        <img src="imgs/0-blended.png">
+                    </span>
+                </div>
+            </div>
+            <div>
+                <h1>Takeaways</h1>
+                <p>
+                    I thought it was interesting how relatively simple the homograph matrix is to compute, and how much poor
+                    pairs of pictures throw off the result even with the automatic feature selection.
+                </p>
+            </div>
+            </article>
+
+            <div id="footer">
+                <table id="footerTable">
+                    <tr>
+                        <td>$BTC</td>
+                        <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                    </tr>
+                    <tr>
+                        <td>$XMR</td>
+                        <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>$ETH</td>
+                        <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                    </tr>
+                    <tr>
+                        <td id="footerDateYear">2021</td>
+                        <td>Max Vogel</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+</body>
+
+</html>

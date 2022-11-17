@@ -100,15 +100,19 @@
             all: unset;
         }
 
-        .hover img:last-child {
+        .hover>img:last-child {
             display: none;
         }
 
-        .hover:hover img:last-child {
+        .hover>img:first-child {
             display: block;
         }
 
-        .hover:hover img:first-child {
+        .hover:hover>img:last-child {
+            display: block;
+        }
+
+        .hover:hover>img:first-child {
             display: none;
         }
     </style>

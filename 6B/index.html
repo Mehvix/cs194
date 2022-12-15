@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh1DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+                macros: {
+                    xfrac: ["{ {}^{#1}\\!/_{#2} }", 2],
+                }
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 | 6B</title>
+    <style>
+        :root {
+            --outside-bg-color: #0b3c11;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+
+        h2 {
+            margin-top: 1em;
+        }
+
+        .right {
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .double {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .double>* {
+            width: 50%;
+        }
+
+        .double>*:last-child {
+            margin-left: 1ch
+        }
+
+        .double>*:first-child {
+            margin-right: 1ch
+        }
+
+        .grid {
+            display: inline-grid;
+            text-align: center;
+            align-items: center;
+            grid-column-gap: 2ch;
+        }
+
+
+        .grid.four {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .grid.three {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+
+        .hover>img:last-child {
+            display: none;
+        }
+
+        .hover>img:first-child {
+            display: block;
+        }
+
+        .hover:hover>img:last-child {
+            display: block;
+        }
+
+        .hover:hover>img:first-child {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">6B:
+                Neural
+                Artistic Style Transfer</a>
+        </div>
+
+        <article>
+            <div>
+                <h1>Overview</h1>
+                <p>
+                    Style transfer involves taking the style (texture) from one image and transferring it to
+                    another. Most parametric (not using the original texture) methods can trace their roots to one of the
+                    fathers of the field of computer vision: <a href="https://en.wikipedia.org/wiki/B%C3%A9la_Julesz">Béla
+                        Julesz</a>. He formalized the notion of textures by conjecturing that they have statistical
+                    properties that our human eyes pick up. Thus, we can coerce an initial noise
+                    image towards one that shares the same statistical parameters (<a
+                        href="https://en.wikipedia.org/wiki/Texton">textons</a>) as the original texture. <a
+                        href="https://www.cns.nyu.edu/heegerlab/content/publications/Heeger-siggraph95.pdf">Heeger & Bergen
+                        '95</a> does this while operating on marginal first-order statistics (in the form of filters),
+                    followed by <a href="http://www.cns.nyu.edu/pub/eero/portilla99-reprint.pdf">Simoncelli & Portilla
+                        '98</a> which implement a more robust method with second-order statistics (i.e. capturing the
+                    relation among first-order statistics). This appeared to be the 'correct' way to quantify textures, but
+                    with the squared complexity (relations) came an increase in the number of parameters to be learned
+                    leading to a computationally expensive model that was finnicky to dial-in.
+                </p>
+
+                <p>
+                    In 2015, <a href="https://arxiv.org/abs/1508.06576">A Neural Algorithm of Artistic Style</a> by Gatys et
+                    al. proposes using deep convolutional neural networks (CNNs) for style transfer. The rationale is that
+                    deep convolutional neural networks trained for image recognition implicitly operate on the content and
+                    style of images -- they've even been used to <a href="https://arxiv.org/abs/1311.3715">classify artworks
+                        according to the period in which they were created</a>. This is thought to be possible as
+                    (successful, object-recognition) networks must become invariant to all object variations that preserve
+                    an object's identity. That is, they are able to factorise the content from appearance. Therefore, we can
+                    pick out specific learned filters/features from the network's layers and use them to extract the relevant
+                    texture information/statistics.
+                </p>
+            </div>
+
+            <div>
+                <h1>Model</h1>
+                <p>
+                    Similar to <a href="../5/">last project</a>, we will be using the <a
+                        href="https://arxiv.org/abs/1409.1556">VGG 19</a> model pretrained on the <a
+                        href="https://en.wikipedia.org/wiki/ImageNet">ImageNet dataset</a>.
+                    Similar to <a
+                        href="https://www.youtube.com/watch?v=lyodbLwb2lY&list=PLWfDJ5nla8UpwShx-lzLJqcp575fKpsSO&index=23">diffusion
+                        networks</a>, we begin with a random noise image. With this, we will coerce it towards the style of
+                    one image and the content of another. Formally, we define the loss function as a weighted sum of these
+                    two loss terms:
+                    <span>
+                        $$
+                        \mathcal L_\text{total}(\vec p, \vec a, \vec x) = \alpha \mathcal L_\text{content}(\vec p, \vec x) +
+                        \beta \mathcal
+                        L_\text{style}(\vec a, \vec x)
+                        $$
+                    </span>
+                    We can look at each learned layer of the network as a non-linear filter bank where the complexity
+                    increases proportionally to the depth within the network. Mathematically, a layer with $N_l$ distinct
+                    filters (feature maps) are of size $M_l$ given by the height times width of the filter. Thus, the
+                    response at each of the $l$ layers can be stored in $F^l \in \mathbb R^{M_l \times N_l}$ where
+                    $F^l_{i,j}$ corresponds to the activation of the $j$<sup>th</sup> filter at the $i$<sup>th</sup> pixel.
+                </p>
+                <div class="double">
+                    <span>
+                        <h2>Content</h2>
+                        To extract the content information from the network we will use <code>conv4_2</code>. Since
+                        it is deep in the stack, it contains the contextual information. With $\vec p,\ \vec x$ as the
+                        (content) original and generated image, we define the content loss as the <a
+                            href="https://en.wikipedia.org/wiki/Mean_squared_error">Mean Squared Error</a> (MSE) between the
+                        corresponding feature representations $P^l,\ F^l$:
+                        <span>
+                            $$
+                            \mathcal L_\text{content}(\vec p, \vec x, l) = \frac{1}{2} \sum_{i,j} \left(P_{i,j}^l -
+                            F_{i,j}^l\right)^2
+                            $$
+                        </span>
+                    </span>
+                    <span>
+                        <h2>Style</h2>
+                        And for style, we'll use the <code>conv1_1</code> through <code>conv5_1</code>. Let $G$ be the <a
+                            href="https://en.wikipedia.org/wiki/Gram_matrix">Gram matrix</a> of the features $F$ (i.e for
+                        some layer $l$: $G_{ij}^l = \sum_k F_{ik}^l F_{jk}^l$). This effectively captures the covariance
+                        between the filters while tossing out the spatial information. With $\vec a,\ \vec x$ as the (style)
+                        original and generated image, we define the style loss as the weighted MSE between the entries of the
+                        corresponding Gram matrices $A^l,\ G^l$:
+                        <span>
+                            $$\begin{align*}
+                            \mathcal L_\text{style} (\vec a, \vec x) &= \sum_l^L w_l \cdot \frac{1}{4N_l^2 M_l^2} \sum_{i,j}
+                            \left(G_{ij}^l -
+                            A_{ij}^l\right)^2 \\
+                            \end{align*}$$
+                        </span>
+                    </span>
+                </div>
+            </div>
+
+            <div>
+                <h1>Implementation</h1>
+                <p>
+                    The authors <a
+                        href="https://discuss.pytorch.org/t/pytorch-tutorial-for-neural-transfert-of-artistic-style/336/20">suggest</a>
+                    using <a href="https://en.wikipedia.org/wiki/Limited-memory_BFGS">LBFGS</a> rather than Adam as the
+                    formers converges much faster (but is more memory intensive). This worked incredibly well as I could get
+                    away with training ~20-40 epochs (as opposed to the 100s). Additionally, since the (image) inputs to
+                    network must be the same size we stretch the style image to match the content.
+                </p>
+                <p>
+                    Because our output image starts as random noise, we can scale it by some percentage to reduce its
+                    variance allowing us to converge to (less grainy) results faster. [Note that these example images were
+                    made on an early version of the program and are scaled differently.].
+                </p>
+
+                <span class="grid four">
+                    <i class='sc'>100% Noise</i>
+                    <i class='sc'>25% Noise</i>
+                    <i class='sc'>10% Noise</i>
+                    <i class='sc'>1% Noise</i>
+                    <img src="./imgs/100_germany-starry_night-1e-2.png">
+                    <img src="./imgs/25_germany-starry_night-1e-2.png">
+                    <img src="./imgs/10_germany-starry_night-1e-2.png">
+                    <img src="./imgs/1_germany-starry_night-1e-2.png">
+                </span>
+                <span class="grid four" style="grid-gap:0.25ch">
+                    <img src="./imgs/100_losses-germany-starry_night-1e-2.png">
+                    <img src="./imgs/25_losses-germany-starry_night-1e-2.png">
+                    <img src="./imgs/10_losses-germany-starry_night-1e-2.png">
+                    <img src="./imgs/1_losses-germany-starry_night-1e-2.png">
+                </span>
+                <br>
+
+                <p>
+                    We also alter the <a
+                        href="https://en.wikipedia.org/wiki/Convolutional_neural_network#Pooling_layer">pooling</a> layers
+                    by swapping from max to average -- this results in better gradient flow and thus smoother images.
+                    Without this change, we can see that the results pick up less on the content and as such takes longer to
+                    converge. This is in contrast to when we initially start with the content image, resulting in too much
+                    content and not enough style. This differs from when we do not normalize our input image according to the
+                    mean and standard deviation of the ImageNet dataset which causes dim results -- you can read more about
+                    when this is a good practice <a href="https://stackoverflow.com/q/58151507/7833617">here</a>.
+                </p>
+                <span class='grid three'>
+                    <i class='sc'>Max Pool</i>
+                    <i class='sc'>Content Initial</i>
+                    <i class='sc'>No Normalization</i>
+
+                    <img src="./imgs/max_5_germany-starry_night-1e-2.png">
+                    <img src="./imgs/copy_germany-starry_night-1e-2.png">
+                    <img src="./imgs/no-norm_5_germany-starry_night-1e-2.png">
+
+                    <img src="./imgs/max_5_losses-germany-starry_night-1e-2.png">
+                    <img src="./imgs/copy_losses-germany-starry_night-1e-2.png">
+                    <img src="./imgs/no-norm_5_losses-germany-starry_night-1e-2.png">
+                </span>
+            </div>
+            <div>
+                <h1>Results</h1>
+                <p>
+                    For the final images, I ended up tuning the hyperparameters on a case-by-case basis. Nearly all began
+                    as the original content image with some amount of low-variance random noise added to it.
+                </p>
+                <p>
+                    You can hover to see the original.
+                </p>
+                <span class="grid two" style="grid-row-gap: 1em;">
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/copy_germany-starry_night-1e-3-E40.png">
+                            <img src="./imgs/og/germany.jpg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/The_Starry_Night">Starry Night</a></i>
+                    </div>
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/t_33_stone-wheatfields-1e-3.png">
+                            <img src="./imgs/og/stone.jpg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/Wheatfield_Under_Thunderclouds">Wheatfield Under
+                                Thunderclouds
+                            </a></i>
+                    </div>
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/copy__hearst-the_scream-1e-4.png">
+                            <!-- <img src="./imgs/copy_hearst-the_scream-1e-3.png"> -->
+                            <!-- todo upscale -->
+                            <img src="./imgs/og/hearst.jpg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/The_Scream">Scream</a></i>
+                    </div>
+                    <!-- <div>
+                        <span class="hover">
+                            <img src="./imgs/max_copy_0_soda-sw-sf-3e-4-E60.png">
+                            <img src="./imgs/og/soda-sw.jpeg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/Sunflowers_(Van_Gogh_series)">Sunflowers (F456)</a></i>
+                    </div> -->
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/copy_evans-seated-nude-1e-3-E40.png">
+                            <img src="./imgs/og/evans.jpg">
+                        </span>
+                        <i><a
+                                href="https://en.wikipedia.org/wiki/File:Pablo_Picasso,_1909-10,_Figure_dans_un_Fauteuil_(Seated_Nude,_Femme_nue_assise),_oil_on_canvas,_92.1_x_73_cm,_Tate_Modern,_London.jpg">Seated
+                                Nude, Femme nue assise</a></i>
+                    </div>
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/copy_greek0-udnie-1e-2.png">
+                            <img src="./imgs/og/greek0.jpg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/Udnie">Udnie</a></i>
+                    </div>
+                    <div>
+                        <span class="hover">
+                            <img src="./imgs/copy_soda-w-sf-3e-4-E40.png">
+                            <img src="./imgs/og/soda-w.jpeg">
+                        </span>
+                        <i><a href="https://en.wikipedia.org/wiki/Sunflowers_(Van_Gogh_series)">Sunflowers (F456)</a></i>
+                    </div>
+                </span>
+            </div>
+        </article>
+
+        <div id="footer">
+            <table id="footerTable">
+                <tr>
+                    <td>$BTC</td>
+                    <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                </tr>
+                <tr>
+                    <td>$XMR</td>
+                    <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ</td>
+                </tr>
+                <tr>
+                    <td>$ETH</td>
+                    <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                </tr>
+                <tr>
+                    <td id="footerDateYear">2021</td>
+                    <td>Max Vogel</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

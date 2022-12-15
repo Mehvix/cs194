@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <title>Mehvix | CS194</title>
+    <style>
+        :root {
+            --outside-bg-color: #097292;
+        }
+
+        article>div {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-column-gap: 1em;
+            grid-row-gap: 0;
+        }
+
+        article>div>div>p {
+            margin-bottom: 0.5em;
+            text-align: center;
+        }
+
+        article img:hover {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a href="//www.mehvix.com/">~</a>/<a class="inverse-bg" href="//cs194.mehvix.com/">CS194</a>
+        </div>
+
+        <article>
+            <div>
+                <div>
+                    <p><a href="./6A/">Image Quilting for Texture Synthesis & Transfer</a></p>
+                    <img src="./6A/imgs/3-yellow-peppers-cut.png" onclick="window.open('/6A/','_self')">
+                </div>
+                <div>
+                    <p><a href="./6B/">Neural Artistic Style</a></p>
+                    <img src="./6B/imgs/copy__hearst-the_scream-1e-4.png" onclick="window.open('/6B/','_self')">
+                </div>
+            </div>
+        </article>
+
+        <div id="footer">
+            <table id="footerTable">
+                <tr>
+                    <td>$BTC</td>
+                    <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                </tr>
+                <tr>
+                    <td>$XMR</td>
+                    <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ
+                    </td>
+                </tr>
+                <tr>
+                    <td>$ETH</td>
+                    <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                </tr>
+                <tr>
+                    <td id="footerDateYear">2021</td>
+                    <td>Max Vogel</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

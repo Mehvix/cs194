@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Default Required Resources -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=569,
+    maximum-scale=1" />
+    <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
+    <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
+    <script src="//mehvix.com/static/js/include.js"></script>
+
+    <!-- HLJS (remove if not used) -->
+    <!-- https://cdnjs.com/libraries/highlight.js -->
+    <!-- <link type="text/css" rel="stylesheet" href="/static/css/atom-one-dark.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js" integrity="sha512-MinqHeqca99q5bWxFNQEQpplMBFiUNrEwuuDj2rCSh2DgeeTXUgvgYIHZ1puBS9IKBkdfLMSk/ZWVDasa3Y/2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+    hljs.highlightAll()
+    </script> -->
+
+    <!-- MathJax (remove if not used) -->
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ["$", "$"],
+                    ["\\(", "\\)"],
+                ],
+            },
+            svg: {
+                fontCache: "global"
+            },
+            loader: {
+                load: ["input/tex", "output/svg"]
+            },
+        };
+    </script>
+
+    <title>Mehvix | CS194 | 6A</title>
+    <style>
+        :root {
+            --outside-bg-color: #140b3c;
+        }
+
+        body {
+            max-width: 75em !important;
+        }
+
+        #footer table td:nth-of-type(2) {
+            max-width: calc(75em - 7ch - 4em - 4em - 1ch);
+        }
+
+        .right {
+            margin: 1em 0 1em 3ch;
+            float: right;
+        }
+
+        .left {
+            margin: 1em 3ch 1em 0;
+            float: left;
+        }
+
+        .grid {
+            display: inline-grid;
+            grid-template-columns: repeat(3, 1fr);
+            align-items: center;
+        }
+
+        .vert {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .diff * {
+            height: 11em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <div class="nav">
+            <a href="//www.mehvix.com/">~</a>/<a href="//cs194.mehvix.com/">CS194</a>/<a href="" class="inverse-bg">6A: Image
+                Quilting for Texture Synthesis & Transfer</a>
+        </div>
+
+        <article>
+            <div>
+                <h1>Overview</h1>
+                <p>
+                    In this project we explore the use of <a href="https://en.wikipedia.org/wiki/Image_quilting">image
+                        quilting</a> for texture synthesis and transfer. Texture synthesis involves generating a larger
+                    texture image by stitching together 'similar' patches from a source image while texture transfer involves
+                    taking an input image and giving it the texture of a source image. The methods used are based on those
+                    from <a
+                        href="https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/papers/efros-siggraph01.pdf">Efros
+                        et. al</a>.
+                </p>
+
+                <details>
+                    <summary>Reveal Source Textures</summary>
+                    <div class="grid">
+                        <img src="./imgs/0-yellow-peppers.png">
+                        <img src="./imgs/0-bricks.png">
+                        <img src="./imgs/0-cm-tile.png">
+                        <img src="./imgs/0-text_small.png">
+                        <img src="./imgs/0-physical_graffiti.png">
+                        <img src="./imgs/0-23.png">
+                    </div>
+                </details>
+
+            </div>
+            <div>
+                <h1>Texture Synthesis</h1>
+                <h2>Naïve</h2>
+                <p>
+                    We can create a poor-quality quilt by going in <a href="https://en.wikipedia.org/wiki/Raster_scan">raster
+                        scanning</a> order over the output image and placing randomly chosen patches from the input image.
+                    This lazy method makes no effort to create a congruous result, but serves as a baseline to beat.
+                </p>
+                <div class="grid">
+                    <img src="./imgs/1-yellow-peppers-random.png">
+                    <img src="./imgs/1-bricks-random.png">
+                    <img src="./imgs/1-cm-tile-random.png">
+                    <img src="./imgs/1-text_small-random.png">
+                    <img src="./imgs/1-physical_graffiti-random.png">
+                    <img src="./imgs/1-23-random.png">
+                </div>
+            </div>
+            <div>
+                <h2>Overlapping</h2>
+                <p>
+                    Starting by randomly sampling the initial patch, we choose the preceding patches by choosing a patch that
+                    is sufficiently similar, by measure of the sum of square differences (SSD), between all possible patches
+                    and the overlapping region the new patch will be placed in.
+                </p>
+                <div class="grid">
+                    <img src="./imgs/2-yellow-peppers-simple.png">
+                    <img src="./imgs/2-bricks-simple.png">
+                    <img src="./imgs/2-cm-tile-simple.png">
+                    <img src="./imgs/2-text_small-simple.png">
+                    <img src="./imgs/2-physical_graffiti-simple.png">
+                    <img src="./imgs/2-23-simple.png">
+                </div>
+            </div>
+            <div>
+                <div class="right grid diff">
+                    <!-- <span><img src="./imgs/3-random1.png"></span> -->
+                    <span><img src="./imgs/3-r1l.png"></span>
+                    <span><img src="./imgs/3-costs.png"></span>
+                    <span><img src="./imgs/3-r2r.png"></span>
+                    <!-- <span><img src="./imgs/3-random2.png"></span> -->
+                </div>
+                <h2>Seam Finding</h2>
+                <p>
+                    We can improve the quality of the quilt by finding the seams between patches. We can do this by finding
+                    the minimum cost path along the overlapping region of the new patch. Here, the cost is the SSD between
+                    pixel values of the overlapping and existing texture (over the 3 color
+                    channels).
+                </p>
+                <p>
+                    To the right you can see two overlap regions of two randomly chosen patches along with the
+                    corresponding cost-map with the shortest path shown as points.
+                </p>
+                <div class="grid">
+                    <img src="./imgs/3-yellow-peppers-cut.png">
+                    <img src="./imgs/3-bricks-cut.png">
+                    <img src="./imgs/3-cm-tile-cut.png">
+                    <img src="./imgs/3-text_small-cut.png">
+                    <img src="./imgs/3-physical_graffiti-cut.png">
+                    <img src="./imgs/3-23-cut.png">
+                </div>
+            </div>
+            <div>
+                <h1>Texture Transfer</h1>
+                <p>
+                    To implement texture transfer, we introduce another cost term based on the difference between the sampled
+                    patch and the corresponding location on the target image to be textured. Essentially, we would like to
+                    combine the low frequencies of the target image with the sharpness of the sampled texture.
+                </p>
+                <!-- todo Show at least two results for texture transfer, including at least one result that uses your own images (either for the target or source texture or both). Briefly explain (one or two sentences is fine) how the texture transfer works. -->
+            </div>
+        </article>
+
+        <div id="footer">
+            <table id="footerTable">
+                <tr>
+                    <td>$BTC</td>
+                    <td>15adHcuUPLHzVmUqKqgeLfLzvtfD5r7WJ1</td>
+                </tr>
+                <tr>
+                    <td>$XMR</td>
+                    <td>45MaKMYnWBnNWS4rtbrMp8C6wL1B1mguW6AjmJBGqLJkCzVUMuXwamzRfrmiwLw1WrbUptNjY1DoL4Yu4fXqTDAcDEWpuTZ</td>
+                </tr>
+                <tr>
+                    <td>$ETH</td>
+                    <td>0xeeC384Cdef3aD975EdF1D2f6C1dC9a4b1fEEBF74</td>
+                </tr>
+                <tr>
+                    <td id="footerDateYear">2021</td>
+                    <td>Max Vogel</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

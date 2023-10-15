@@ -284,9 +284,8 @@
                     the input point $(u,v)$ and $I(x,y)$ is the intensity of the image:
                     <!-- spaghetti latex, look away!! -->
                     $$\begin{align}
-                    E(u,v) &= \sum_{(x,y)\in W} \overbrace{\big(I(x+u,y+v)}^{\mathclap{\Large\qquad\qquad\qquad\approx\
-                    I(x,y) + I_x u + I_y v\ =\ \begin{bmatrix} I_x & I_y \end{bmatrix} \begin{bmatrix} u \\ v
-                    \end{bmatrix}}} + I(x,y) \big)^2 \\
+                    E(u,v) &= \sum_{(x,y)\in W} \big(\overbrace{I(x+u,y+v)}^{\mathclap{\Large \approx\ 
+                    I(x,y) + I_x u + I_y v}} + I(x,y) \big)^2 \\
                     &\approx \sum_{(x,y)\in W} \left(I(x,y) + \begin{bmatrix} I_x & I_y
                     \end{bmatrix} \begin{bmatrix} u \\ v \end{bmatrix} - I(x,y)\right)^2 \\
                     &=\sum_{(x,y)\in W} \left(\begin{bmatrix} I_x & I_y \end{bmatrix} \begin{bmatrix} u \\ v

@@ -9,6 +9,7 @@
     <link rel="alternate" type="application/rss+xml" title="Blog RSS" href="//mehvix.com/posts/rss.xml" />
     <link href="//mehvix.com/static/css/style.css" type="text/css" rel="stylesheet" />
     <script src="//mehvix.com/static/js/include.js"></script>
+    <script src="//mehvix.com/static/js/footnote.js"></script>
 
     <!-- HLJS (remove if not used) -->
     <!-- https://cdnjs.com/libraries/highlight.js -->
@@ -156,17 +157,12 @@
                     </p>
                     <p>
                         To accomplish all this, I used <a href="https://github.com/aleju/imgaug/">imgaug</a> which is a very
-                        nice augmentation library. All of it's functions can operate not only on images, but also
-                        operate on the keypoints as well<sup>1</sup>. Below you can see the new, augmented training
-                        set:
+                        nice augmentation library. All of its functions can operate not only on images, but also
+                        operate on the keypoints as well. Below you can see the new, <span class="footnote" data-footnote="I had also tried to flip vertically with a 50% chance, but since the keypoints were
+                        naively mirrored such that left-right labels were not swapped it led to the network 'learning', by
+                        minimizing the error, to place all points on a vertical line through the middle of the face.">augmented training set</span> :
                     </p>
                     <img src="imgs/2-train-aug.png">
-                    <p>
-                        <hr>
-                        <sup>1</sup>: I had also tried to flip vertically with a 50% chance, but since the keypoints were
-                        naively mirrored such that left-right labels were not swapped it led to the network 'learning', by
-                        minimizing the error, to place all points on a vertical line through the middle of the face.
-                    </p>
                 </div>
                 <h2>Model</h2>
                 <div>

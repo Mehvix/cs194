@@ -284,7 +284,7 @@
                     the input point $(u,v)$ and $I(x,y)$ is the intensity of the image:
                     <!-- spaghetti latex, look away!! -->
                     $$\begin{align}
-                    E(u,v) &= \sum_{(x,y)\in W} \big(\overbrace{I(x+u,y+v)}^{\mathclap{\Large \approx\ 
+                    E(u,v) &= \sum_{(x,y)\in W} \big(\overbrace{I(x+u,y+v)}^{\mathclap{\Large \approx\
                     I(x,y) + I_x u + I_y v}} + I(x,y) \big)^2 \\
                     &\approx \sum_{(x,y)\in W} \left(I(x,y) + \begin{bmatrix} I_x & I_y
                     \end{bmatrix} \begin{bmatrix} u \\ v \end{bmatrix} - I(x,y)\right)^2 \\
@@ -302,7 +302,7 @@
                     first-order Taylor approximation of $E(u,v)$, we can find the eigenvalues of $M$. $1/\sqrt
                     \lambda_{\max}$ turns out to be the direction of quickest change in intensity, and $1/\sqrt
                     \lambda_{\min}$ is the direction of slowest change in intensity. Thus if both of the eigens are large and
-                    their ratio is close to 1, then we classify the point is a corner. Alternatively, had one of these eigens
+                    their ratio is close to 1, then we classify the point as a corner. Alternatively, had one of these eigens
                     been large and the other small then we would have discovered an edge; $\lambda_1\gg \lambda_2 \implies$
                     vertical edge, $\lambda_1\ll \lambda_2 \implies$ horizontal edge. Below you can see the results of the
                     Harris detector:
@@ -323,7 +323,7 @@
                     $x_i$ we find the smallest radius to the next nearest neighboring point $x_j$ such that the corner
                     response, $f(\cdot)$, from the Harris detector of the original point is less than some constant,
                     $c_\text{robust}$, multiplied by the response for the other point:
-                    $$r_i = \min_j | x_i - x_j | : f(x_i) < c_\text{robust} f(x_j) %>$$
+                    $$r_i = \min_j || x_i - x_j ||_2 : f(x_i) < c_\text{robust} f(x_j) %>$$
                         Then to select the most spaced apart points to use, we sort the points by their radius $r_i$ and take
                         the largest $n$. Below you can see the results of using a pyramid in tandem with ANMS:
                 </p>
